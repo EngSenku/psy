@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Therapist On Call</title>
+  <title>AI Tutor - Adaptive STEM Learning</title>
   <script>
     window.APP_BASE = '/ai';
     (function(){
@@ -29,7 +29,7 @@
       height: 100%;
       background: none;
       color: var(--light);
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       overflow: hidden;
     }
     body::before {
@@ -39,7 +39,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: url(static/office.png) no-repeat center center fixed; /* Updated path */
+      background: url(static/office.png) no-repeat center center fixed;
       background-size: cover;
       filter: blur(10px);
       z-index: -1;
@@ -160,6 +160,10 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 12px rgba(220,53,69,0.4);
     }
+    .btn-secondary {
+      background: linear-gradient(135deg, #6c757d, #545b62);
+      color: #fff;
+    }
     .slider-container {
       display: flex;
       flex-direction: column;
@@ -258,30 +262,18 @@
       #chatPanel { width:calc(100% - 40px); left:20px; right:20px; max-height:40vh; }
     }
   </style>
-  <!-- Dependencies -->
-<!-- Dependencies -->
-<!-- Cubism 5 SDK for Web R3 runtime -->
-<script src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"></script>  <!-- Cubism 5 SDK for Web R3 -->
 
-<!-- Cubism 2.1 runtime (if needed for older models) -->
-<script src="https://cdn.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"></script>  <!-- Cubism 2.1 runtime -->
-
-<!-- PixiJS library -->
-<script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.2/dist/browser/pixi.min.js"></script>  <!-- PixiJS -->
-
-<!-- Pixi Live2D plugin (supports both Cubism 2.1 and 5) -->
-<script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/index.min.js"></script>  <!-- Pixi Live2D plugin -->
-
-<!-- Socket.IO for chat integration -->
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>  <!-- Socket.IO -->
-
-</head>
+  <script src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.2/dist/browser/pixi.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/index.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1 class="title">Therapist On Call</h1>
-      <p class="subtitle">Welcome to Therapist On Call—your safe space, available anytime you need to talk. I'm here to listen, understand, and guide you through life's ups and downs. We'll explore your feelings together, unpack what's holding you back, and help you find clarity and comfort.</p>
+      <h1 class="title">AI Tutor</h1>
+      <p class="subtitle">Adaptive STEM learning with emotion-aware guidance. Speak naturally and I'll help you learn at your pace.</p>
     </div>
     <canvas id="canvas"></canvas>
     <div class="status">
@@ -291,8 +283,7 @@
     <div class="controls">
       <button id="playBtn" class="btn btn-primary"><span id="playIcon">▶</span> Play</button>
       <button id="stopBtn" class="btn btn-danger"><span>■</span> Stop</button>
-      <!-- Added Reset Chat button -->
-      <button id="resetChatBtn" style="display: none;" class="btn btn-secondary">Reset Chat</button>
+      <button id="resetChatBtn" class="btn btn-secondary">Reset Chat</button>
       <div class="slider-container">
         <div class="slider-label"><span>Volume</span><span id="volumeValue">100%</span></div>
         <input type="range" id="volumeSlider" min="0" max="100" value="100" />
@@ -302,73 +293,99 @@
   </div>
   <video id="cam" width="160" height="120" autoplay muted playsinline style="display:none"></video>
   <canvas id="frameCanvas" width="160" height="120" style="display:none"></canvas>
+
   <script>
     (async () => {
-      const $ = id => document.getElementById(id), log = (...m) => console.log('[Therapist]', ...m);
-      // Chat Panel
+      const $ = id => document.getElementById(id);
+      const log = (...m) => console.log('[Tutor]', ...m);
+
       const chatPanel = document.createElement('div');
-      chatPanel.id = 'chatPanel'; document.body.appendChild(chatPanel);
+      chatPanel.id = 'chatPanel';
+      document.body.appendChild(chatPanel);
+
       async function updateChat() {
         try {
-          console.log('Fetching chat memory...');
-          const res = await fetch(window.APP_BASE + '/chat_memory.json?ts=' + Date.now()); if (!res.ok) throw new Error('Network response was not ok');
+          const res = await fetch(window.APP_BASE + '/chat_memory.json?ts=' + Date.now());
+          if (!res.ok) throw new Error('Network response was not ok');
           const data = await res.json();
-          console.log('Chat memory data:', data);
-          const chatContainer = document.createElement('div'); chatContainer.className = 'chat-container';
-          data.forEach(item => { const bubble = document.createElement('div'); bubble.className = `chat-bubble ${item.role}`; bubble.textContent = item.text; chatContainer.appendChild(bubble); });
-          chatPanel.innerHTML = ''; chatPanel.appendChild(chatContainer); chatPanel.scrollTop = chatPanel.scrollHeight;
-        } catch (e) { console.error('Failed to load chat memory:', e); }
+          const chatContainer = document.createElement('div');
+          chatContainer.className = 'chat-container';
+          data.forEach(item => {
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble ${item.role}`;
+            bubble.textContent = item.text;
+            chatContainer.appendChild(bubble);
+          });
+          chatPanel.innerHTML = '';
+          chatPanel.appendChild(chatContainer);
+          chatPanel.scrollTop = chatPanel.scrollHeight;
+        } catch (e) {
+          console.error('Failed to load chat memory:', e);
+        }
       }
-      updateChat(); setInterval(updateChat, 2000);
-      
-      // Add event listener to reset chat and delete chat_memory.json content
+      updateChat();
+      setInterval(updateChat, 2000);
+
       $('resetChatBtn').addEventListener('click', async () => {
-          try {
-              const res = await fetch(window.APP_BASE + '/reset_chat', { method: 'POST' });
-              if (res.ok) {
-                  chatPanel.innerHTML = ''; // clear chat panel
-              } else {
-                  console.error('Failed to reset chat');
-              }
-          } catch (e) {
-              console.error('Error resetting chat:', e);
+        try {
+          const res = await fetch(window.APP_BASE + '/reset_chat', { method: 'POST' });
+          if (res.ok) {
+            chatPanel.innerHTML = '';
           }
+        } catch (e) {
+          console.error('Error resetting chat:', e);
+        }
       });
 
-      // Pixi + Live2D
       const app = new PIXI.Application({ view: $('canvas'), resizeTo: window, backgroundAlpha: 0, antialias: true });
-      function updateStatus(msg, active) { $('statusText').textContent = msg; $('statusIndicator').classList[active ? 'add' : 'remove']('active'); }
+
+      function updateStatus(msg, active) {
+        $('statusText').textContent = msg;
+        $('statusIndicator').classList[active ? 'add' : 'remove']('active');
+      }
       updateStatus('Loading model…', true);
+
       let model;
       try {
         model = await PIXI.live2d.Live2DModel.from('haru/Haru.model3.json', { autoInteract: false });
-        model.anchor.set(0.4); model.scale.set(0.55); app.stage.addChild(model); app.ticker.add(delta => model.update(delta));
-        const resizeModel = () => model.position.set(app.screen.width*0.43, app.screen.height*1);
-        resizeModel(); window.addEventListener('resize', resizeModel); updateStatus('Ready', false);
-      } catch (error) { console.error('Failed to load Live2D model:', error); updateStatus('Model error', false); }
+        model.anchor.set(0.4);
+        model.scale.set(0.55);
+        app.stage.addChild(model);
+        app.ticker.add(delta => model.update(delta));
+        const resizeModel = () => model.position.set(app.screen.width * 0.43, app.screen.height * 1);
+        resizeModel();
+        window.addEventListener('resize', resizeModel);
+        updateStatus('Ready', false);
+      } catch (error) {
+        console.error('Failed to load Live2D model:', error);
+        updateStatus('Model error', false);
+      }
 
-      // Audio & lip-sync
-      const audioCtx = new (window.AudioContext||window.webkitAudioContext)(), analyser = audioCtx.createAnalyser(); analyser.fftSize=1024; const waveform=new Uint8Array(analyser.frequencyBinCount);
-      let audio=null, tickerHandle=null, audioSource=null, currentIntensity=1.5; // Increase from 1.0 for more pronounced movement
-      let prevMouth = 0; // smoothing variable
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 1024;
+      const waveform = new Uint8Array(analyser.frequencyBinCount);
+      let audio = null;
+      let tickerHandle = null;
+      let audioSource = null;
+      let currentIntensity = 1.5;
+      let prevMouth = 0;
 
       function createAudio(src) {
         if (audio) {
-            audio.pause();
-            audio.removeEventListener('ended', onAudioEnded);
-            audio.removeEventListener('timeupdate', onTimeUpdate);
-            if (audioSource) audioSource.disconnect();
+          audio.pause();
+          audio.removeEventListener('ended', onAudioEnded);
+          audio.removeEventListener('timeupdate', onTimeUpdate);
+          if (audioSource) audioSource.disconnect();
         }
         audio = new Audio();
         audio.crossOrigin = 'anonymous';
         audio.src = src.startsWith('/static') ? window.location.origin + src : src;
         audio.load();
         audio.addEventListener('canplaythrough', () => {
-            console.log('Audio can play through:', src);
-            audioSource = audioCtx.createMediaElementSource(audio);
-            audioSource.connect(analyser);
-            analyser.connect(audioCtx.destination);
-            console.log('Audio source connected to analyser');
+          audioSource = audioCtx.createMediaElementSource(audio);
+          audioSource.connect(analyser);
+          analyser.connect(audioCtx.destination);
         }, { once: true });
         audio.volume = $('volumeSlider').value / 100;
         audio.addEventListener('ended', onAudioEnded);
@@ -376,29 +393,59 @@
         audio.addEventListener('error', onAudioError);
       }
 
-      function onAudioError(){ updateStatus('Audio error',false);}      
-      function onTimeUpdate(){ if(audio&&audio.duration){ $('audioProgress').style.width=`${(audio.currentTime/audio.duration)*100}%`; drawWaveform(); }}
-      function onAudioEnded(){ stopAudio(); }
-      async function playAudio(){ if(!audio){ updateStatus('No audio loaded',false); return; } try{ await audioCtx.resume(); await audio.play(); $('playIcon').textContent='⏸'; updateStatus('Playing',true); if(tickerHandle) app.ticker.remove(tickerHandle); tickerHandle=app.ticker.add(lipSyncTick); initWaveformCanvas(); }catch(err){ console.error('Playback failed:',err); updateStatus('Playback error',false);} }
-      function pauseAudio(){ if(audio) audio.pause(); $('playIcon').textContent='▶'; updateStatus('Paused',false); if(tickerHandle) app.ticker.remove(tickerHandle); }
+      function onAudioError() { updateStatus('Audio error', false); }
+      function onTimeUpdate() {
+        if (audio && audio.duration) {
+          $('audioProgress').style.width = `${(audio.currentTime / audio.duration) * 100}%`;
+          drawWaveform();
+        }
+      }
+      function onAudioEnded() { stopAudio(); }
+
+      async function playAudio() {
+        if (!audio) {
+          updateStatus('No audio loaded', false);
+          return;
+        }
+        try {
+          await audioCtx.resume();
+          await audio.play();
+          $('playIcon').textContent = '⏸';
+          updateStatus('Playing', true);
+          if (tickerHandle) app.ticker.remove(tickerHandle);
+          tickerHandle = app.ticker.add(lipSyncTick);
+          initWaveformCanvas();
+        } catch (err) {
+          console.error('Playback failed:', err);
+          updateStatus('Playback error', false);
+        }
+      }
+
+      function pauseAudio() {
+        if (audio) audio.pause();
+        $('playIcon').textContent = '▶';
+        updateStatus('Paused', false);
+        if (tickerHandle) app.ticker.remove(tickerHandle);
+      }
+
       function stopAudio() {
         if (audio) {
-            audio.pause();
-            audio.currentTime = 0;
+          audio.pause();
+          audio.currentTime = 0;
         }
         $('playIcon').textContent = '▶';
         updateStatus('Stopped', false);
         $('audioProgress').style.width = '0%';
         if (tickerHandle) {
-            app.ticker.remove(tickerHandle); // Remove lipSyncTick from the ticker
+          app.ticker.remove(tickerHandle);
+          if (model && model.internalModel && model.internalModel.coreModel) {
             model.internalModel.coreModel.setParameterValueById('ParamMouthOpenY', 0);
+          }
         }
       }
-      
+
       function lipSyncTick() {
         if (!model) return;
-
-        // Get time domain data and compute a normalized amplitude
         analyser.getByteTimeDomainData(waveform);
         let sum = 0;
         for (let i = 0; i < waveform.length; i++) {
@@ -406,72 +453,134 @@
         }
         const amp = (sum / waveform.length) / 128;
         const v = Math.min(amp * currentIntensity, 1);
-
-        // Debug logging to monitor values
-        console.log('amp:', amp, ' v:', v, 'prevMouth before:', prevMouth);
-
-        // Use dynamicAlpha for a smoother/faster response when v is low
         const dynamicAlpha = (v < 0.1) ? 1.0 : 0.8;
         prevMouth = prevMouth + (v - prevMouth) * dynamicAlpha;
-        // Clamp prevMouth between 0 and 1
         prevMouth = Math.max(0, Math.min(prevMouth, 1));
-
-        console.log('prevMouth updated:', prevMouth);
-
-        // Amplify the mouth opening by multiplying with a factor (e.g. 1.3), then clamp to 1
         const extraOpen = Math.min(prevMouth * 2, 1);
-        // Update the model's mouth parameter for lip synching
-        model.internalModel.coreModel.setParameterValueById('ParamMouthOpenY', extraOpen);
+        if (model.internalModel && model.internalModel.coreModel) {
+          model.internalModel.coreModel.setParameterValueById('ParamMouthOpenY', extraOpen);
+        }
       }
 
-      function initWaveformCanvas(){ const c=$('waveform'); c.width=c.offsetWidth; c.height=c.offsetHeight; c.getContext('2d').clearRect(0,0,c.width,c.height);}      
-      function drawWaveform(){ if(!audio||audio.paused) return; const c=$('waveform'), ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); analyser.getByteTimeDomainData(waveform); ctx.beginPath(); ctx.lineWidth=2; const grad=ctx.createLinearGradient(0,0,c.width,0); grad.addColorStop(0,'rgba(106,90,205,0.8)'); grad.addColorStop(0.5,'rgba(138,122,221,1)'); grad.addColorStop(1,'rgba(106,90,205,0.8)'); ctx.strokeStyle=grad; const sliceWidth=c.width/waveform.length; let x=0; for(let i=0;i<waveform.length;i++){ const y=(waveform[i]/128.0)*c.height/2; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); x+=sliceWidth;} ctx.lineTo(c.width,c.height/2); ctx.stroke(); ctx.lineWidth=1; ctx.strokeStyle='rgba(106,90,205,0.4)'; ctx.stroke(); requestAnimationFrame(drawWaveform);}      
-      // UI bindings
-      $('playBtn').onclick=()=>audio&&!audio.paused?pauseAudio():playAudio(); $('stopBtn').onclick=stopAudio; $('volumeSlider').oninput=e=>{ const vol=e.target.value; $('volumeValue').textContent=`${vol}%`; if(audio) audio.volume=vol/100; };
-      // Socket.IO
+      function initWaveformCanvas() {
+        const c = $('waveform');
+        c.width = c.offsetWidth;
+        c.height = c.offsetHeight;
+        c.getContext('2d').clearRect(0, 0, c.width, c.height);
+      }
+
+      function drawWaveform() {
+        if (!audio || audio.paused) return;
+        const c = $('waveform');
+        const ctx = c.getContext('2d');
+        ctx.clearRect(0, 0, c.width, c.height);
+        analyser.getByteTimeDomainData(waveform);
+        ctx.beginPath();
+        ctx.lineWidth = 2;
+        const grad = ctx.createLinearGradient(0, 0, c.width, 0);
+        grad.addColorStop(0, 'rgba(106,90,205,0.8)');
+        grad.addColorStop(0.5, 'rgba(138,122,221,1)');
+        grad.addColorStop(1, 'rgba(106,90,205,0.8)');
+        ctx.strokeStyle = grad;
+        const sliceWidth = c.width / waveform.length;
+        let x = 0;
+        for (let i = 0; i < waveform.length; i++) {
+          const y = (waveform[i] / 128.0) * c.height / 2;
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          x += sliceWidth;
+        }
+        ctx.lineTo(c.width, c.height / 2);
+        ctx.stroke();
+      }
+
+      $('playBtn').onclick = () => audio && !audio.paused ? pauseAudio() : playAudio();
+      $('stopBtn').onclick = stopAudio;
+      $('volumeSlider').oninput = e => {
+        const vol = e.target.value;
+        $('volumeValue').textContent = `${vol}%`;
+        if (audio) audio.volume = vol / 100;
+      };
+
       let socket;
-      try{ socket=io('http://localhost:5000',{transports:['websocket'],reconnectionAttempts:5}); socket.on('connect',()=>{ log('Connected to server'); updateStatus('Connected',true); }); socket.on('bot_reply',msg=>{ log('Bot reply:',msg.advice); createAudio(msg.audio+'?ts='+Date.now()); playAudio(); }); }catch(err){ console.error('Socket error:',err); updateStatus('Connection error',false);}      
-// Webcam
-      // 🚨 START OF CORRECTED WEBCAM LOGIC 🚨
+      try {
+        socket = io('http://localhost:5000', { transports: ['websocket'], reconnectionAttempts: 5 });
+        socket.on('connect', () => {
+          log('Connected to server');
+          updateStatus('Connected', true);
+        });
+        socket.on('bot_reply', msg => {
+          log('Bot reply received');
+          createAudio(msg.audio + '?ts=' + Date.now());
+          playAudio();
+        });
+      } catch (err) {
+        console.error('Socket error:', err);
+        updateStatus('Connection error', false);
+      }
+
       const cam = $('cam');
-      const frameCanvas = $('frameCanvas'); // Get the new canvas element
+      const frameCanvas = $('frameCanvas');
       const frameCtx = frameCanvas.getContext('2d');
       let camOK = false;
 
-      // 1. INITIALIZE AND START CAMERA
-      try { 
-          // 🚨 UNCOMMENTED & FIXED 🚨: This prompts the user for camera access
-          // Use {video: true} to request access. width/height are suggestions.
-          cam.srcObject = await navigator.mediaDevices.getUserMedia({video:{width:160,height:120}}); 
-          camOK = true;
-          log('Webcam initialized.');
-      } catch (e) { 
-          log('Webcam initialization failed. Emotion detection will be disabled.', e);
-          camOK = false; 
+      try {
+        cam.srcObject = await navigator.mediaDevices.getUserMedia({ video: { width: 160, height: 120 } });
+        camOK = true;
+      } catch (e) {
+        log('Webcam not available:', e);
+        camOK = false;
       }
 
-      // 2. FRAME CAPTURE FUNCTION
-      function snapFrame() { 
-          // Check if camera is initialized and has data ready
-          if (!camOK || cam.readyState < 2) { 
-              return ''; // Return empty string if camera is not ready
-          }
-          
-          // Draw the current video frame to the canvas
-          frameCtx.drawImage(cam, 0, 0, frameCanvas.width, frameCanvas.height);
-          
-          // Convert the canvas content to a base64 JPEG string
-          return frameCanvas.toDataURL('image/jpeg', 0.7); // Use 0.7 for performance
+      function snapFrame() {
+        if (!camOK || cam.readyState < 2) {
+          return '';
+        }
+        frameCtx.drawImage(cam, 0, 0, frameCanvas.width, frameCanvas.height);
+        return frameCanvas.toDataURL('image/jpeg', 0.7);
       }
-      // 🚨 END OF CORRECTED WEBCAM LOGIC 🚨
-      // Speech Recognition
-      const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ updateStatus('Speech recognition not supported',false); return;}      
-      const rec=new SR(); rec.continuous=true; rec.lang='en-US'; rec.interimResults=false;
-      rec.onresult=e=>{ const r=e.results[e.results.length-1]; if(!r.isFinal) return; const text=r[0].transcript.trim(); if(!text) return; log('User said:',text); updateStatus('Processing...',true); if(socket&&socket.connected) socket.emit('user_input',{text,frame:snapFrame()}); };
-      rec.onend=()=>{ try{ rec.start(); updateStatus('Listening...',true);}catch{} };
-      rec.onerror=err=>{ if(err.error!=='not-allowed'&&err.error!=='service-not-allowed'){ try{ rec.start();}catch{} }};
-      try{ rec.start(); updateStatus('Listening...',true);}catch(err){ updateStatus('Speech recognition error',false);}      
-      window.addEventListener('resize',()=>{ if($('waveform')) initWaveformCanvas(); });
+
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        updateStatus('Speech recognition not supported', false);
+      } else {
+        const rec = new SR();
+        rec.continuous = true;
+        rec.lang = 'en-US';
+        rec.interimResults = false;
+        rec.onresult = e => {
+          const r = e.results[e.results.length - 1];
+          if (!r.isFinal) return;
+          const text = r[0].transcript.trim();
+          if (!text) return;
+          updateStatus('Processing...', true);
+          if (socket && socket.connected) {
+            socket.emit('user_input', { text, frame: snapFrame() });
+          }
+        };
+        rec.onend = () => {
+          try {
+            rec.start();
+            updateStatus('Listening...', true);
+          } catch (err) {}
+        };
+        rec.onerror = err => {
+          if (err.error !== 'not-allowed' && err.error !== 'service-not-allowed') {
+            try {
+              rec.start();
+            } catch (err) {}
+          }
+        };
+        try {
+          rec.start();
+          updateStatus('Listening...', true);
+        } catch (err) {
+          updateStatus('Speech recognition error', false);
+        }
+      }
+
+      window.addEventListener('resize', () => {
+        if ($('waveform')) initWaveformCanvas();
+      });
     })();
   </script>
 </body>

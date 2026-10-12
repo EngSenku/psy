@@ -1,11 +1,11 @@
-# emotion_module.py
 import cv2
 import base64
 import numpy as np
 from deepface import DeepFace
 
+
 def analyze_emotion(img_b64: str) -> str:
-    """Decode a base64 JPEG, run DeepFace emotion detection, return dominant if ≥50%."""
+    """Decode a base64 JPEG, run DeepFace emotion detection, return dominant emotion if confidence >= 50%."""
     if not img_b64:
         return "neutral"
     try:
@@ -23,5 +23,5 @@ def analyze_emotion(img_b64: str) -> str:
         if max(scores.values()) >= 50:
             return res[0]["dominant_emotion"]
     except Exception as e:
-        print("❌ Emotion detection error:", e)
+        print(f"Emotion detection error: {e}")
     return "neutral"
