@@ -215,6 +215,7 @@ psy/
 ├── emotion_module.py   # Webcam frame → emotion (DeepFace)
 ├── index.html          # Single-page frontend (UI, avatar, audio, socket client)
 ├── requirements.txt
+├── LICENSE
 ├── haru/               # Live2D avatar model
 ├── docs/               # README images
 ├── static/             # Images and generated audio
@@ -233,4 +234,4 @@ psy/
 
 ## License
 
-MIT.
+Released under the [MIT License](LICENSE).
