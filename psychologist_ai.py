@@ -210,8 +210,19 @@ def _generate_reply(messages, system_prompt):
 def get_psychologist_advice(emotion: str, user_input: str) -> str:
     memory = trim_memory(load_memory())
     messages = [{"role": t["role"], "content": t["text"]} for t in memory]
-    messages.append({"role": "user", "content": user_input})
 
+    # Hand the model the visual cue for this turn only. It is kept out of the
+    # stored history so the raw conversation stays clean.
+    if emotion and emotion != "neutral":
+        prompt_text = (
+            f"(The webcam suggests the person currently looks {emotion}. "
+            f"Let that shape your tone, without mentioning the camera.)\n\n{user_input}"
+        )
+    else:
+        prompt_text = user_input
+    messages.append({"role": "user", "content": prompt_text})
+
+    logger.info(f"Detected emotion: {emotion}")
     logger.info(f"Sending request to {PROVIDER} ({MODEL_NAME})")
     try:
         reply = _generate_reply(messages, SYSTEM_PROMPT)
