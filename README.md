@@ -1,8 +1,8 @@
-# AI Tutor
+# Psy
 
-**An emotion-aware STEM tutor that listens, watches, and adapts to the student in real time.**
+**An emotion-aware AI psychologist that listens, notices how you feel, and responds with empathy in real time.**
 
-The assistant holds a spoken conversation, reads facial expressions through the webcam, and shapes its teaching style accordingly — while an animated Live2D avatar speaks the replies back with lip-syncing.
+Psy holds a spoken conversation, reads facial expressions through the webcam, and adapts its tone accordingly — while an animated Live2D avatar speaks the replies back with lip-syncing.
 
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![Flask](https://img.shields.io/badge/flask-3.0-black)
@@ -13,9 +13,11 @@ The assistant holds a spoken conversation, reads facial expressions through the 
 
 ## Overview
 
-Most tutoring bots only read text. This one also *sees* the learner. When a student looks confused, the tutor slows down and rephrases; when they look engaged, it goes deeper. The goal is a tutor that reacts the way a good human teacher does.
+Most chat companions only read text. Psy also *sees* you. When it detects sadness or anxiety it slows down and stays gentle; when it detects frustration it becomes grounding; when you sound engaged, it stays curious and open. The goal is a companion that responds the way a thoughtful, attentive listener would.
 
 The pipeline is simple: the browser handles speech recognition and webcam capture, a Flask/Socket.IO backend runs emotion detection and the LLM, and the reply comes back as text plus synthesized speech that drives the avatar's mouth.
+
+> Psy is a portfolio demonstration, not a substitute for professional mental-health care.
 
 ## How it works
 
@@ -26,7 +28,7 @@ flowchart LR
     STT --> Socket[Socket.IO client]
     Socket -->|user_input| Server[Flask + Socket.IO]
     Server --> Emotion[DeepFace emotion detection]
-    Server --> LLM[Gemini tutor]
+    Server --> LLM[LLM psychologist]
     Emotion --> LLM
     LLM --> TTS[gTTS synthesis]
     TTS -->|audio + text| Socket
@@ -35,7 +37,7 @@ flowchart LR
 
 1. **Capture** – the browser transcribes speech (Web Speech API) and grabs a webcam frame.
 2. **Analyze** – the server reads the frame with DeepFace and classifies the dominant emotion.
-3. **Respond** – Gemini generates a tutoring reply conditioned on the message, the emotion, and prior conversation.
+3. **Respond** – the LLM writes an empathetic reply conditioned on the message, the emotion, and prior conversation.
 4. **Speak** – the reply is converted to speech (cached by content hash) and streamed back to the client.
 5. **Animate** – the Live2D model lip-syncs to the audio's amplitude while the text lands in the chat panel.
 
@@ -50,13 +52,18 @@ flowchart LR
 | Audio | pydub, FFmpeg |
 | Frontend | Vanilla JS, PixiJS, Live2D Cubism |
 
-## Prerequisites
+## Browser support
 
-- **Python 3.11** — required; TensorFlow/DeepFace do not yet support 3.13+
-- **FFmpeg** on your `PATH` (used by pydub for audio conversion)
-- An API key for a supported LLM provider (see [Choosing a language model](#choosing-a-language-model)) — a free key from [build.nvidia.com](https://build.nvidia.com) works
-- A webcam and microphone
-- Chrome or Edge recommended (Web Speech API support)
+Voice input relies on the browser's **Web Speech API**, which is not available in every browser. Use one that supports it:
+
+| Browser | Voice input |
+|---|---|
+| Google Chrome (desktop) | ✅ Works |
+| Microsoft Edge | ✅ Works |
+| Brave / other Chromium builds on Linux | ⚠️ Usually unavailable |
+| Firefox / Safari | ❌ Not supported |
+
+> **You must open the app in a browser with Web Speech API support** (Google Chrome is the safe choice). On an unsupported browser, speech recognition fails silently, the UI sits on *"Listening…"*, and nothing is ever sent to the server. The webcam/emotion side still works. Microphone access also requires `http://localhost` or HTTPS.
 
 ## Installation
 
@@ -99,7 +106,7 @@ pip install -r requirements.txt
 
 ## Choosing a language model
 
-The tutor can use Google Gemini **or any OpenAI-compatible API** (NVIDIA NIM, OpenAI, Groq, OpenRouter, Ollama, ...). Only the reply model changes — emotion detection and speech stay exactly the same.
+Psy can use Google Gemini **or any OpenAI-compatible API** (NVIDIA NIM, OpenAI, Groq, OpenRouter, Ollama, ...). Only the reply model changes — emotion detection and speech stay exactly the same.
 
 > Examples below use bash `export`. On fish, use `set -x NAME "value"` instead
 > (shown for the main two).
@@ -193,16 +200,16 @@ Grab a free key and browse the full catalog at [build.nvidia.com](https://build.
 python controller.py            # fish (without activation): venv/bin/python controller.py
 ```
 
-Open **http://localhost:5000** and allow microphone and webcam access, then just start talking — or type in the message box, which works everywhere. Make sure the provider you chose above is configured (see [Choosing a language model](#choosing-a-language-model)).
+Open **http://localhost:5000** in a browser that supports voice input (see [Browser support](#browser-support)), allow microphone and webcam access, then start talking. Make sure the provider you chose above is configured (see [Choosing a language model](#choosing-a-language-model)).
 
-> The first launch downloads the DeepFace emotion model (~6 MB). Voice input uses the browser's Web Speech API, which needs a Chromium-based browser with a working speech backend; on some Linux builds it is unavailable, so use the text box instead.
+> The first launch downloads the DeepFace emotion model (~6 MB). Voice input needs an internet connection because the Web Speech API is cloud-based.
 
 ## Project structure
 
 ```
 psy/
 ├── controller.py       # Flask server, routes, and Socket.IO event handling
-├── psychologist_ai.py  # LLM tutor (Gemini / OpenAI-compatible), memory, and TTS
+├── psychologist_ai.py  # LLM psychologist (Gemini / OpenAI-compatible), memory, TTS
 ├── emotion_module.py   # Webcam frame → emotion (DeepFace)
 ├── index.html          # Single-page frontend (UI, avatar, audio, socket client)
 ├── requirements.txt
@@ -214,11 +221,13 @@ psy/
 
 ## Notes and limitations
 
+- **Use Google Chrome or Edge** — voice input depends on the Web Speech API, which many Linux Chromium builds (e.g. Brave) lack.
 - Emotion detection is only as good as the lighting — a clear, front-facing view works best.
 - Browser speech recognition is cloud-based, so it needs a network connection.
 - Speech is cached by a hash of the text, so repeated lines don't regenerate audio.
-- Conversation state is stored as plain JSON on disk; there is no database.
+- Conversation state is stored as plain JSON on disk; there is no persistent database.
+- Psy is not a medical tool and does not diagnose or treat anything.
 
 ## License
 
-Released under the MIT License. Free to use for learning and experimentation.
+MIT.

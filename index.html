@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>AI Tutor - Adaptive STEM Learning</title>
+  <title>Psy · AI Psychologist</title>
   <script>
     window.APP_BASE = '/ai';
     (function(){
@@ -164,30 +164,6 @@
       background: linear-gradient(135deg, #6c757d, #545b62);
       color: #fff;
     }
-    .input-group {
-      display: flex;
-      gap: 8px;
-      flex-grow: 1;
-      min-width: 260px;
-    }
-    .input-group input {
-      flex: 1;
-      padding: 10px 18px;
-      border-radius: 50px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.08);
-      color: var(--light);
-      font-size: 16px;
-      outline: none;
-      transition: border-color 0.2s ease, background 0.2s ease;
-    }
-    .input-group input:focus {
-      border-color: var(--primary-light);
-      background: rgba(255,255,255,0.14);
-    }
-    .input-group input::placeholder {
-      color: #aaa;
-    }
     .slider-container {
       display: flex;
       flex-direction: column;
@@ -296,8 +272,8 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1 class="title">AI Tutor</h1>
-      <p class="subtitle">Adaptive STEM learning with emotion-aware guidance. Speak naturally and I'll help you learn at your pace.</p>
+      <h1 class="title">Psy</h1>
+      <p class="subtitle">An emotion-aware AI psychologist that listens, notices how you feel, and responds with empathy.</p>
     </div>
     <canvas id="canvas"></canvas>
     <div class="status">
@@ -305,10 +281,6 @@
       <span id="statusText">Ready</span>
     </div>
     <div class="controls">
-      <div class="input-group">
-        <input id="chatInput" type="text" placeholder="Type a message and press Enter…" autocomplete="off" />
-        <button id="sendBtn" class="btn btn-primary">Send</button>
-      </div>
       <button id="playBtn" class="btn btn-primary"><span id="playIcon">▶</span> Play</button>
       <button id="stopBtn" class="btn btn-danger"><span>■</span> Stop</button>
       <button id="resetChatBtn" class="btn btn-secondary">Reset Chat</button>
@@ -325,7 +297,7 @@
   <script>
     (async () => {
       const $ = id => document.getElementById(id);
-      const log = (...m) => console.log('[Tutor]', ...m);
+      const log = (...m) => console.log('[Psy]', ...m);
 
       const chatPanel = document.createElement('div');
       chatPanel.id = 'chatPanel';
@@ -521,29 +493,6 @@
         ctx.stroke();
       }
 
-      function sendMessage(text) {
-        text = (text || '').trim();
-        if (!text) return;
-        if (!socket || !socket.connected) {
-          updateStatus('Not connected to server', false);
-          return;
-        }
-        updateStatus('Thinking…', true);
-        socket.emit('user_input', { text, frame: snapFrame() });
-      }
-
-      $('sendBtn').onclick = () => {
-        const input = $('chatInput');
-        sendMessage(input.value);
-        input.value = '';
-      };
-      $('chatInput').addEventListener('keydown', e => {
-        if (e.key !== 'Enter') return;
-        e.preventDefault();
-        sendMessage(e.target.value);
-        e.target.value = '';
-      });
-
       $('playBtn').onclick = () => audio && !audio.paused ? pauseAudio() : playAudio();
       $('stopBtn').onclick = stopAudio;
       $('volumeSlider').oninput = e => {
@@ -592,10 +541,9 @@
 
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) {
-        updateStatus('Voice input unavailable — type a message below', false);
+        updateStatus('Speech recognition not supported', false);
       } else {
         const rec = new SR();
-        let voiceAlive = true;
         rec.continuous = true;
         rec.lang = 'en-US';
         rec.interimResults = false;
@@ -604,37 +552,29 @@
           if (!r.isFinal) return;
           const text = r[0].transcript.trim();
           if (!text) return;
-          updateStatus('Thinking…', true);
+          updateStatus('Processing...', true);
           if (socket && socket.connected) {
             socket.emit('user_input', { text, frame: snapFrame() });
           }
         };
         rec.onend = () => {
-          if (!voiceAlive) return;
           try {
             rec.start();
-            updateStatus('Listening…', true);
+            updateStatus('Listening...', true);
           } catch (err) {}
         };
         rec.onerror = err => {
-          // Chromium builds on Linux usually have no speech backend and fail
-          // with a network error here; fall back to the text input instead of
-          // silently retrying forever.
-          if (err.error === 'network' || err.error === 'audio-capture') {
-            voiceAlive = false;
-            updateStatus('Voice input unavailable — type a message below', false);
-            return;
-          }
-          if (err.error === 'not-allowed' || err.error === 'service-not-allowed') {
-            voiceAlive = false;
-            updateStatus('Microphone blocked — type a message below', false);
+          if (err.error !== 'not-allowed' && err.error !== 'service-not-allowed') {
+            try {
+              rec.start();
+            } catch (err) {}
           }
         };
         try {
           rec.start();
-          updateStatus('Listening…', true);
+          updateStatus('Listening...', true);
         } catch (err) {
-          updateStatus('Voice input unavailable — type a message below', false);
+          updateStatus('Speech recognition error', false);
         }
       }
 
