@@ -54,7 +54,7 @@ flowchart LR
 
 - **Python 3.11** — required; TensorFlow/DeepFace do not yet support 3.13+
 - **FFmpeg** on your `PATH` (used by pydub for audio conversion)
-- A **Google Gemini API key** — get one at [aistudio.google.com](https://aistudio.google.com/app/apikey)
+- An API key for a supported LLM provider (see [Choosing a language model](#choosing-a-language-model)) — a free key from [build.nvidia.com](https://build.nvidia.com) works
 - A webcam and microphone
 - Chrome or Edge recommended (Web Speech API support)
 
@@ -71,6 +71,20 @@ Create and activate a Python 3.11 virtual environment:
 python3.11 -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 ```
+
+<details>
+<summary>Using fish shell?</summary>
+
+`activate` is a bash script, so fish can't source it. Use the fish variant, or
+skip activation and call the interpreter directly:
+
+```fish
+source venv/bin/activate.fish
+# or simply:
+venv/bin/python controller.py
+```
+
+</details>
 
 If your system Python is newer than 3.11, you can get 3.11 without touching
 your system install using [uv](https://docs.astral.sh/uv/):
@@ -89,6 +103,8 @@ pip install -r requirements.txt
 ## Choosing a language model
 
 The tutor can use Google Gemini **or any OpenAI-compatible API** (NVIDIA NIM, OpenAI, Groq, OpenRouter, Ollama, ...). Only the reply model changes — emotion detection and speech stay exactly the same.
+
+> The examples below use bash `export`. On fish, use `set -x NAME "value"` instead.
 
 **Gemini (default):**
 
