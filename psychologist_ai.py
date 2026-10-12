@@ -19,7 +19,7 @@ from gtts import gTTS
 from pydub import AudioSegment
 
 
-# --- Configuration ----------------------------------------------------------
+# --- Configuration ---
 
 PROVIDER = os.getenv("LLM_PROVIDER", "gemini").strip().lower()
 
@@ -39,7 +39,7 @@ CACHE_DIR = os.getenv("TTS_CACHE_DIR", "tts_cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 
-# --- Provider validation ----------------------------------------------------
+# --- Provider validation ---
 
 if PROVIDER == "gemini":
     if not GEMINI_API_KEY:
@@ -51,7 +51,7 @@ else:
     raise RuntimeError(f"Unsupported LLM_PROVIDER: {PROVIDER!r}")
 
 
-# --- Logging ----------------------------------------------------------------
+# --- Logging ---
 
 logging.basicConfig(
     level=logging.INFO,
@@ -60,7 +60,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# --- System prompt ----------------------------------------------------------
+# --- System prompt ---
 
 SYSTEM_PROMPT = """
 You are Psy, a warm and empathetic AI psychologist.
@@ -69,7 +69,7 @@ You are a supportive listener, not a doctor. You never diagnose conditions,
 prescribe medication, or replace professional care.
 
 Guidelines:
-1. **Listen first** — let the person finish, then reflect back what you heard before adding anything.
+1. **Listen first**: let the person finish, then reflect back what you heard before adding anything.
 2. **Read the room**: adapt your tone to the emotion you detect. Be gentle with sadness or anxiety, steady and grounding with frustration or anger, and warm with moments of relief or joy.
 3. **Stay curious**: ask open questions ("What was that like for you?") rather than jumping to advice.
 4. **Validate, don't judge**: treat every feeling as real, even when the reasoning behind it seems off.
@@ -82,7 +82,7 @@ Keep replies conversational and human: short paragraphs, plain language, no clin
 """
 
 
-# --- Conversation memory ----------------------------------------------------
+# --- Conversation memory ---
 
 def load_memory():
     if os.path.exists(MEMORY_FILE):
@@ -103,7 +103,7 @@ def trim_memory(memory):
     return memory[-MAX_MEMORY_TURNS:]
 
 
-# --- Text-to-speech ---------------------------------------------------------
+# --- Text-to-speech ---
 
 def text_to_filename(text):
     hash_name = md5(text.encode("utf-8")).hexdigest()
@@ -144,7 +144,7 @@ def speak_response(text):
         logger.error(f"TTS failed: {e}")
 
 
-# --- Language model clients -------------------------------------------------
+# --- Language model clients ---
 
 _gemini_client = None
 _openai_client = None
@@ -205,7 +205,7 @@ def _generate_reply(messages, system_prompt):
     return _openai_reply(messages, system_prompt)
 
 
-# --- Public entry point -----------------------------------------------------
+# --- Public entry point ---
 
 def get_psychologist_advice(emotion: str, user_input: str) -> str:
     memory = trim_memory(load_memory())

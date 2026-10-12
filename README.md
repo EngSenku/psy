@@ -2,7 +2,7 @@
 
 **An emotion-aware AI psychologist that listens, notices how you feel, and responds with empathy in real time.**
 
-Psy holds a spoken conversation, reads facial expressions through the webcam, and adapts its tone accordingly — while an animated Live2D avatar speaks the replies back with lip-syncing.
+Psy holds a spoken conversation, reads facial expressions through the webcam, and adapts its tone accordingly. An animated Live2D avatar speaks the replies back with lip-syncing.
 
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![Flask](https://img.shields.io/badge/flask-3.0-black)
@@ -37,11 +37,11 @@ flowchart LR
     Socket --> Avatar[Live2D avatar + lip-sync]
 ```
 
-1. **Capture** – the browser transcribes speech (Web Speech API) and grabs a webcam frame.
-2. **Analyze** – the server reads the frame with DeepFace and classifies the dominant emotion.
-3. **Respond** – the LLM writes an empathetic reply conditioned on the message, the emotion, and prior conversation.
-4. **Speak** – the reply is converted to speech (cached by content hash) and streamed back to the client.
-5. **Animate** – the Live2D model lip-syncs to the audio's amplitude while the text lands in the chat panel.
+1. **Capture:** the browser transcribes speech (Web Speech API) and grabs a webcam frame.
+2. **Analyze:** the server reads the frame with DeepFace and classifies the dominant emotion.
+3. **Respond:** the LLM writes an empathetic reply conditioned on the message, the emotion, and prior conversation.
+4. **Speak:** the reply is converted to speech (cached by content hash) and streamed back to the client.
+5. **Animate:** the Live2D model lip-syncs to the audio's amplitude while the text lands in the chat panel.
 
 ## Tech stack
 
@@ -60,12 +60,12 @@ Voice input relies on the browser's **Web Speech API**, which is not available i
 
 | Browser | Voice input |
 |---|---|
-| Google Chrome (desktop) | ✅ Works |
-| Microsoft Edge | ✅ Works |
-| Brave / other Chromium builds on Linux | ⚠️ Usually unavailable |
-| Firefox / Safari | ❌ Not supported |
+| Google Chrome (desktop) | Works |
+| Microsoft Edge | Works |
+| Brave / other Chromium builds on Linux | Usually unavailable |
+| Firefox / Safari | Not supported |
 
-> **You must open the app in a browser with Web Speech API support** (Google Chrome is the safe choice). On an unsupported browser, speech recognition fails silently, the UI sits on *"Listening…"*, and nothing is ever sent to the server. The webcam/emotion side still works. Microphone access also requires `http://localhost` or HTTPS.
+> **You must open the app in a browser with Web Speech API support** (Google Chrome is the safe choice). On an unsupported browser, speech recognition fails silently, the UI sits on *"Listening..."*, and nothing is ever sent to the server. The webcam/emotion side still works. Microphone access also requires `http://localhost` or HTTPS.
 
 ## Installation
 
@@ -108,7 +108,7 @@ pip install -r requirements.txt
 
 ## Choosing a language model
 
-Psy can use Google Gemini **or any OpenAI-compatible API** (NVIDIA NIM, OpenAI, Groq, OpenRouter, Ollama, ...). Only the reply model changes — emotion detection and speech stay exactly the same.
+Psy can use Google Gemini **or any OpenAI-compatible API** (NVIDIA NIM, OpenAI, Groq, OpenRouter, Ollama, ...). Only the reply model changes; emotion detection and speech stay exactly the same.
 
 > Examples below use bash `export`. On fish, use `set -x NAME "value"` instead
 > (shown for the main two).
@@ -187,9 +187,9 @@ Grab a free key and browse the full catalog at [build.nvidia.com](https://build.
 | Variable | Default | Description |
 |---|---|---|
 | `LLM_PROVIDER` | `gemini` | `gemini` or `openai` (any OpenAI-compatible endpoint) |
-| `GEMINI_API_KEY` | – | Gemini API key (required for the Gemini provider) |
+| `GEMINI_API_KEY` | - | Gemini API key (required for the Gemini provider) |
 | `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini model used for replies |
-| `OPENAI_API_KEY` | – | API key for the OpenAI-compatible provider |
+| `OPENAI_API_KEY` | - | API key for the OpenAI-compatible provider |
 | `OPENAI_BASE_URL` | `https://integrate.api.nvidia.com/v1` | Base URL for the OpenAI-compatible provider |
 | `OPENAI_MODEL` | `nvidia/nemotron-3-super-120b-a12b` | Model used for the OpenAI-compatible provider |
 | `MEMORY_FILE` | `chat_memory.json` | Path to the conversation history file |
@@ -224,8 +224,8 @@ psy/
 
 ## Notes and limitations
 
-- **Use Google Chrome or Edge** — voice input depends on the Web Speech API, which many Linux Chromium builds (e.g. Brave) lack.
-- Emotion detection is only as good as the lighting — a clear, front-facing view works best.
+- **Use Google Chrome or Edge:** voice input depends on the Web Speech API, which many Linux Chromium builds (e.g. Brave) lack.
+- Emotion detection is only as good as the lighting; a clear, front-facing view works best.
 - Browser speech recognition is cloud-based, so it needs a network connection.
 - Speech is cached by a hash of the text, so repeated lines don't regenerate audio.
 - Conversation state is stored as plain JSON on disk; there is no persistent database.
