@@ -193,9 +193,9 @@ Grab a free key and browse the full catalog at [build.nvidia.com](https://build.
 python controller.py            # fish (without activation): venv/bin/python controller.py
 ```
 
-Open **http://localhost:5000** and allow microphone and webcam access, then just start talking. Make sure the provider you chose above is configured (see [Choosing a language model](#choosing-a-language-model)).
+Open **http://localhost:5000** and allow microphone and webcam access, then just start talking — or type in the message box, which works everywhere. Make sure the provider you chose above is configured (see [Choosing a language model](#choosing-a-language-model)).
 
-> The first launch downloads the DeepFace emotion model (~6 MB). Browser speech recognition needs an internet connection.
+> The first launch downloads the DeepFace emotion model (~6 MB). Voice input uses the browser's Web Speech API, which needs a Chromium-based browser with a working speech backend; on some Linux builds it is unavailable, so use the text box instead.
 
 ## Project structure
 
