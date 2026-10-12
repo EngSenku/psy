@@ -2,15 +2,11 @@
 import os
 import uuid
 import asyncio
-import base64
-import cv2
-import numpy as np
 import shutil
 import json
 
-from flask import Flask, render_template, send_from_directory, request
+from flask import Flask, render_template, send_from_directory
 from flask_socketio import SocketIO, emit
-from deepface import DeepFace
 
 from psychologist_ai import get_psychologist_advice, generate_speech
 from emotion_module import analyze_emotion
@@ -40,12 +36,8 @@ def audio(fname):
 @app.route("/ai/reset_chat", methods=["POST"])
 def reset_chat():
     try:
-        if not os.path.exists(CHAT_MEMORY_PATH):
-            with open(CHAT_MEMORY_PATH, "w") as f:
-                f.write("[]")
-        else:
-            with open(CHAT_MEMORY_PATH, "w") as f:
-                f.write("[]")
+        with open(CHAT_MEMORY_PATH, "w") as f:
+            f.write("[]")
         return "Chat reset", 200
     except Exception as e:
         print(f"Error resetting chat: {e}")
@@ -63,15 +55,6 @@ def chat_memory():
 def serve_haru_files(filename):
     haru_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "haru")
     return send_from_directory(haru_path, filename)
-
-
-def decode_frame(data_url: str):
-    try:
-        _, b64 = data_url.split(",", 1)
-        arr = np.frombuffer(base64.b64decode(b64), np.uint8)
-        return cv2.imdecode(arr, cv2.IMREAD_COLOR)
-    except Exception:
-        return None
 
 
 @socketio.on("user_input")

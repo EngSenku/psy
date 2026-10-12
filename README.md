@@ -31,7 +31,7 @@ An interactive AI-powered tutoring system that combines speech recognition, real
 
 ## Prerequisites
 
-- Python 3.10 or 3.11
+- **Python 3.11** (required — TensorFlow/DeepFace do not yet support 3.13+)
 - FFmpeg installed for audio processing
 - Webcam access
 - Microphone access
@@ -45,10 +45,17 @@ git clone <repository-url>
 cd psy
 ```
 
-2. Create and activate a virtual environment:
+2. Create a Python 3.11 virtual environment and activate it:
 ```bash
-python -m venv venv
+python3.11 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+If your system Python is newer than 3.11, you can get 3.11 without changing your
+system install using [uv](https://docs.astral.sh/uv/):
+```bash
+uv venv --python 3.11 venv
+source venv/bin/activate
 ```
 
 3. Install dependencies:
@@ -76,6 +83,10 @@ http://localhost:5000
 
 3. Allow microphone and camera permissions when prompted
 4. Start speaking - the AI tutor will respond and adapt based on your emotions
+
+> The first launch downloads the DeepFace emotion model (~6 MB) and may take a
+> little longer. Speech recognition in the browser requires an internet
+> connection and works best in Chrome or Edge.
 
 ## Project Structure
 
