@@ -65,33 +65,30 @@ git clone https://github.com/EngSenku/psy.git
 cd psy
 ```
 
-Create and activate a Python 3.11 virtual environment:
+Create and activate a Python 3.11 virtual environment.
 
+**bash / zsh:**
 ```bash
 python3.11 -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 ```
 
-<details>
-<summary>Using fish shell?</summary>
-
-`activate` is a bash script, so fish can't source it. Use the fish variant, or
-skip activation and call the interpreter directly:
-
+**fish:**
 ```fish
+python3.11 -m venv venv
 source venv/bin/activate.fish
-# or simply:
-venv/bin/python controller.py
 ```
 
-</details>
+> **fish note:** `venv/bin/activate` is a bash script and errors in fish. Use
+> `activate.fish` as shown, or skip activation entirely and prefix commands with
+> `venv/bin/` (e.g. `venv/bin/python controller.py`).
 
 If your system Python is newer than 3.11, you can get 3.11 without touching
 your system install using [uv](https://docs.astral.sh/uv/):
 
 ```bash
 uv venv --python 3.11 venv
-source venv/bin/activate
+source venv/bin/activate        # fish: source venv/bin/activate.fish
 ```
 
 Install dependencies:
@@ -104,7 +101,8 @@ pip install -r requirements.txt
 
 The tutor can use Google Gemini **or any OpenAI-compatible API** (NVIDIA NIM, OpenAI, Groq, OpenRouter, Ollama, ...). Only the reply model changes — emotion detection and speech stay exactly the same.
 
-> The examples below use bash `export`. On fish, use `set -x NAME "value"` instead.
+> Examples below use bash `export`. On fish, use `set -x NAME "value"` instead
+> (shown for the main two).
 
 **Gemini (default):**
 
@@ -112,11 +110,20 @@ The tutor can use Google Gemini **or any OpenAI-compatible API** (NVIDIA NIM, Op
 export GEMINI_API_KEY="your_api_key_here"
 ```
 
+```fish
+set -x GEMINI_API_KEY "your_api_key_here"
+```
+
 **NVIDIA NIM** (OpenAI-compatible, defaults are already set for it):
 
 ```bash
 export LLM_PROVIDER=openai
 export OPENAI_API_KEY="nvapi-..."
+```
+
+```fish
+set -x LLM_PROVIDER openai
+set -x OPENAI_API_KEY "nvapi-..."
 ```
 
 Other OpenAI-compatible providers, by overriding the base URL and model:
@@ -183,7 +190,7 @@ Grab a free key and browse the full catalog at [build.nvidia.com](https://build.
 ## Usage
 
 ```bash
-python controller.py
+python controller.py            # fish (without activation): venv/bin/python controller.py
 ```
 
 Open **http://localhost:5000** and allow microphone and webcam access, then just start talking. Make sure the provider you chose above is configured (see [Choosing a language model](#choosing-a-language-model)).
