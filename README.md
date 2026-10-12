@@ -122,6 +122,34 @@ export OPENAI_API_KEY="ollama"
 export OPENAI_MODEL="llama3.1"
 ```
 
+### Free models on NVIDIA
+
+NVIDIA serves many models behind the same OpenAI-compatible endpoint. Choose one with `OPENAI_MODEL`:
+
+| Model | `OPENAI_MODEL` value |
+|---|---|
+| Nemotron 3 Super *(default)* | `nvidia/nemotron-3-super-120b-a12b` |
+| Nemotron 3 Ultra | `nvidia/nemotron-3-ultra-550b-a55b` |
+| Nemotron Lightning *(fast)* | `nvidia/nemotron-3.5-lightning-30b-a3b` |
+| Nemotron Nano | `nvidia/nemotron-nano-3-30b-a3b` |
+| DeepSeek V4.1 | `deepseek-ai/deepseek-v4.1-flash` |
+| GLM 5.3 | `z-ai/glm-5.3` |
+| GLM 5.3 Flash | `z-ai/glm-5.3-flash` |
+| Kimi K3 | `moonshotai/kimi-k3` |
+| Kimi K2.6 | `moonshotai/kimi-k2.6` |
+| GPT-OSS 20B | `openai/gpt-oss-20b` |
+| Muse Glimmer | `meta/muse-glimmer-30b` |
+
+To use Kimi instead, for instance:
+
+```bash
+export LLM_PROVIDER=openai
+export OPENAI_API_KEY="nvapi-..."
+export OPENAI_MODEL="moonshotai/kimi-k3"
+```
+
+Grab a free key and browse the full catalog at [build.nvidia.com](https://build.nvidia.com).
+
 ## Environment variables
 
 | Variable | Default | Description |
@@ -131,7 +159,7 @@ export OPENAI_MODEL="llama3.1"
 | `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini model used for replies |
 | `OPENAI_API_KEY` | – | API key for the OpenAI-compatible provider |
 | `OPENAI_BASE_URL` | `https://integrate.api.nvidia.com/v1` | Base URL for the OpenAI-compatible provider |
-| `OPENAI_MODEL` | `nvidia/llama-3.1-nemotron-70b-instruct` | Model used for the OpenAI-compatible provider |
+| `OPENAI_MODEL` | `nvidia/nemotron-3-super-120b-a12b` | Model used for the OpenAI-compatible provider |
 | `MEMORY_FILE` | `chat_memory.json` | Path to the conversation history file |
 | `MAX_MEMORY_TURNS` | `20` | Conversation turns kept in context |
 | `TTS_CACHE_DIR` | `tts_cache` | Directory for cached speech files |

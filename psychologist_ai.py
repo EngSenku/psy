@@ -28,7 +28,7 @@ GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://integrate.api.nvidia.com/v1")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "nvidia/llama-3.1-nemotron-70b-instruct")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "nvidia/nemotron-3-super-120b-a12b")
 
 MODEL_NAME = GEMINI_MODEL if PROVIDER == "gemini" else OPENAI_MODEL
 
