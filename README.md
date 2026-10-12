@@ -44,7 +44,7 @@ flowchart LR
 | Layer | Tools |
 |---|---|
 | Backend | Flask, Flask-SocketIO, Eventlet |
-| AI / LLM | Google Gemini (`google-genai`) |
+| AI / LLM | Google Gemini or any OpenAI-compatible API (NVIDIA, Groq, OpenRouter, Ollama) |
 | Vision | OpenCV, DeepFace, TensorFlow |
 | Speech | Web Speech API (browser), gTTS (server) |
 | Audio | pydub, FFmpeg |
@@ -86,20 +86,52 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-## Configuration
+## Choosing a language model
 
-Set your Gemini key before starting the server:
+The tutor can use Google Gemini **or any OpenAI-compatible API** (NVIDIA NIM, OpenAI, Groq, OpenRouter, Ollama, ...). Only the reply model changes — emotion detection and speech stay exactly the same.
+
+**Gemini (default):**
 
 ```bash
 export GEMINI_API_KEY="your_api_key_here"
 ```
 
-Optional overrides:
+**NVIDIA NIM** (OpenAI-compatible, defaults are already set for it):
+
+```bash
+export LLM_PROVIDER=openai
+export OPENAI_API_KEY="nvapi-..."
+```
+
+Other OpenAI-compatible providers, by overriding the base URL and model:
+
+```bash
+# OpenAI
+export LLM_PROVIDER=openai
+export OPENAI_API_KEY="sk-..."
+export OPENAI_BASE_URL="https://api.openai.com/v1"
+export OPENAI_MODEL="gpt-4o-mini"
+
+# Groq
+export OPENAI_BASE_URL="https://api.groq.com/openai/v1"
+export OPENAI_MODEL="llama-3.3-70b-versatile"
+
+# Local Ollama (no key needed)
+export OPENAI_BASE_URL="http://localhost:11434/v1"
+export OPENAI_API_KEY="ollama"
+export OPENAI_MODEL="llama3.1"
+```
+
+## Environment variables
 
 | Variable | Default | Description |
 |---|---|---|
-| `GEMINI_API_KEY` | – | Gemini API key (**required**) |
-| `GEMINI_MODEL` | `gemini-2.5-flash` | Model used for replies |
+| `LLM_PROVIDER` | `gemini` | `gemini` or `openai` (any OpenAI-compatible endpoint) |
+| `GEMINI_API_KEY` | – | Gemini API key (required for the Gemini provider) |
+| `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini model used for replies |
+| `OPENAI_API_KEY` | – | API key for the OpenAI-compatible provider |
+| `OPENAI_BASE_URL` | `https://integrate.api.nvidia.com/v1` | Base URL for the OpenAI-compatible provider |
+| `OPENAI_MODEL` | `nvidia/llama-3.1-nemotron-70b-instruct` | Model used for the OpenAI-compatible provider |
 | `MEMORY_FILE` | `chat_memory.json` | Path to the conversation history file |
 | `MAX_MEMORY_TURNS` | `20` | Conversation turns kept in context |
 | `TTS_CACHE_DIR` | `tts_cache` | Directory for cached speech files |
@@ -110,7 +142,7 @@ Optional overrides:
 python controller.py
 ```
 
-Open **http://localhost:5000** and allow microphone and webcam access, then just start talking.
+Open **http://localhost:5000** and allow microphone and webcam access, then just start talking. Make sure the provider you chose above is configured (see [Choosing a language model](#choosing-a-language-model)).
 
 > The first launch downloads the DeepFace emotion model (~6 MB). Browser speech recognition needs an internet connection.
 
@@ -119,7 +151,7 @@ Open **http://localhost:5000** and allow microphone and webcam access, then just
 ```
 psy/
 ├── controller.py       # Flask server, routes, and Socket.IO event handling
-├── psychologist_ai.py  # Gemini tutor, conversation memory, and TTS
+├── psychologist_ai.py  # LLM tutor (Gemini / OpenAI-compatible), memory, and TTS
 ├── emotion_module.py   # Webcam frame → emotion (DeepFace)
 ├── index.html          # Single-page frontend (UI, avatar, audio, socket client)
 ├── requirements.txt
