@@ -9,6 +9,8 @@ Psy holds a spoken conversation, reads facial expressions through the webcam, an
 ![TensorFlow](https://img.shields.io/badge/tensorflow-2.20-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+![Psy interface](docs/screenshot.png)
+
 ---
 
 ## Overview
@@ -214,6 +216,7 @@ psy/
 ├── index.html          # Single-page frontend (UI, avatar, audio, socket client)
 ├── requirements.txt
 ├── haru/               # Live2D avatar model
+├── docs/               # README images
 ├── static/             # Images and generated audio
 ├── tts_cache/          # Cached speech (generated)
 └── ai/                 # Chat memory store (generated)
