@@ -1,125 +1,141 @@
-# AI Tutor - Emotion-Aware STEM Learning Assistant
+# AI Tutor
 
-An interactive AI-powered tutoring system that combines speech recognition, real-time emotion detection, and an animated 3D avatar to provide personalized STEM education.
+**An emotion-aware STEM tutor that listens, watches, and adapts to the student in real time.**
 
-## Features
+The assistant holds a spoken conversation, reads facial expressions through the webcam, and shapes its teaching style accordingly — while an animated Live2D avatar speaks the replies back with lip-syncing.
 
-- **Voice Interaction**: Natural speech input and output for hands-free learning
-- **Emotion Detection**: Real-time facial emotion analysis to adapt teaching style
-- **Adaptive Teaching**: Socratic approach that guides discovery rather than giving answers
-- **3D Avatar**: Live2D animated character with lip-syncing during speech
-- **Persistent Memory**: Maintains conversation history across sessions
-- **Real-time Conversation**: WebSocket-based communication for responsive interaction
-- **Cross-platform Audio**: Text-to-speech with local caching
+![Python](https://img.shields.io/badge/python-3.11-blue)
+![Flask](https://img.shields.io/badge/flask-3.0-black)
+![TensorFlow](https://img.shields.io/badge/tensorflow-2.20-orange)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## How It Works
+---
 
-1. **User speaks**: Speech recognition captures user input
-2. **Emotion analysis**: Webcam captures facial expression, DeepFace analyzes emotions
-3. **AI response**: Gemini generates adaptive tutoring response based on emotion and context
-4. **Speech synthesis**: gTTS converts response to audio with caching
-5. **Avatar animation**: Live2D model lip-syncs with the generated audio
+## Overview
 
-## Tech Stack
+Most tutoring bots only read text. This one also *sees* the learner. When a student looks confused, the tutor slows down and rephrases; when they look engaged, it goes deeper. The goal is a tutor that reacts the way a good human teacher does.
 
-- **Backend**: Flask, Flask-SocketIO, Eventlet
-- **Frontend**: HTML5, JavaScript, PixiJS, Live2D Cubism
-- **AI**: Google Gemini API
-- **Computer Vision**: OpenCV, DeepFace
-- **Speech**: SpeechRecognition (browser), gTTS (server)
-- **Audio**: pydub
+The pipeline is simple: the browser handles speech recognition and webcam capture, a Flask/Socket.IO backend runs emotion detection and the LLM, and the reply comes back as text plus synthesized speech that drives the avatar's mouth.
+
+## How it works
+
+```mermaid
+flowchart LR
+    Mic[Microphone] -->|Web Speech API| STT[Speech-to-text]
+    Cam[Webcam] -->|JPEG frame| Socket
+    STT --> Socket[Socket.IO client]
+    Socket -->|user_input| Server[Flask + Socket.IO]
+    Server --> Emotion[DeepFace emotion detection]
+    Server --> LLM[Gemini tutor]
+    Emotion --> LLM
+    LLM --> TTS[gTTS synthesis]
+    TTS -->|audio + text| Socket
+    Socket --> Avatar[Live2D avatar + lip-sync]
+```
+
+1. **Capture** – the browser transcribes speech (Web Speech API) and grabs a webcam frame.
+2. **Analyze** – the server reads the frame with DeepFace and classifies the dominant emotion.
+3. **Respond** – Gemini generates a tutoring reply conditioned on the message, the emotion, and prior conversation.
+4. **Speak** – the reply is converted to speech (cached by content hash) and streamed back to the client.
+5. **Animate** – the Live2D model lip-syncs to the audio's amplitude while the text lands in the chat panel.
+
+## Tech stack
+
+| Layer | Tools |
+|---|---|
+| Backend | Flask, Flask-SocketIO, Eventlet |
+| AI / LLM | Google Gemini (`google-genai`) |
+| Vision | OpenCV, DeepFace, TensorFlow |
+| Speech | Web Speech API (browser), gTTS (server) |
+| Audio | pydub, FFmpeg |
+| Frontend | Vanilla JS, PixiJS, Live2D Cubism |
 
 ## Prerequisites
 
-- **Python 3.11** (required — TensorFlow/DeepFace do not yet support 3.13+)
-- FFmpeg installed for audio processing
-- Webcam access
-- Microphone access
-- Google Gemini API key
+- **Python 3.11** — required; TensorFlow/DeepFace do not yet support 3.13+
+- **FFmpeg** on your `PATH` (used by pydub for audio conversion)
+- A **Google Gemini API key** — get one at [aistudio.google.com](https://aistudio.google.com/app/apikey)
+- A webcam and microphone
+- Chrome or Edge recommended (Web Speech API support)
 
 ## Installation
 
-1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/EngSenku/psy.git
 cd psy
 ```
 
-2. Create a Python 3.11 virtual environment and activate it:
+Create and activate a Python 3.11 virtual environment:
+
 ```bash
 python3.11 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate        # Windows: venv\Scripts\activate
 ```
 
-If your system Python is newer than 3.11, you can get 3.11 without changing your
-system install using [uv](https://docs.astral.sh/uv/):
+If your system Python is newer than 3.11, you can get 3.11 without touching
+your system install using [uv](https://docs.astral.sh/uv/):
+
 ```bash
 uv venv --python 3.11 venv
 source venv/bin/activate
 ```
 
-3. Install dependencies:
+Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Set environment variables:
+## Configuration
+
+Set your Gemini key before starting the server:
+
 ```bash
 export GEMINI_API_KEY="your_api_key_here"
-export GEMINI_MODEL="gemini-2.5-flash"  # Optional
 ```
+
+Optional overrides:
+
+| Variable | Default | Description |
+|---|---|---|
+| `GEMINI_API_KEY` | – | Gemini API key (**required**) |
+| `GEMINI_MODEL` | `gemini-2.5-flash` | Model used for replies |
+| `MEMORY_FILE` | `chat_memory.json` | Path to the conversation history file |
+| `MAX_MEMORY_TURNS` | `20` | Conversation turns kept in context |
+| `TTS_CACHE_DIR` | `tts_cache` | Directory for cached speech files |
 
 ## Usage
 
-1. Start the server:
 ```bash
 python controller.py
 ```
 
-2. Open your browser and navigate to:
-```
-http://localhost:5000
-```
+Open **http://localhost:5000** and allow microphone and webcam access, then just start talking.
 
-3. Allow microphone and camera permissions when prompted
-4. Start speaking - the AI tutor will respond and adapt based on your emotions
+> The first launch downloads the DeepFace emotion model (~6 MB). Browser speech recognition needs an internet connection.
 
-> The first launch downloads the DeepFace emotion model (~6 MB) and may take a
-> little longer. Speech recognition in the browser requires an internet
-> connection and works best in Chrome or Edge.
-
-## Project Structure
+## Project structure
 
 ```
 psy/
-├── controller.py      # Flask server and WebSocket handling
-├── psychologist_ai.py # AI logic and memory management
-├── emotion_module.py  # Emotion detection using DeepFace
-├── index.html         # Frontend interface
-├── requirements.txt   # Python dependencies
-├── haru/             # Live2D avatar model files
-├── static/           # Static assets (images, audio)
-├── tts_cache/        # Cached TTS audio files
-└── ai/               # Chat memory storage
+├── controller.py       # Flask server, routes, and Socket.IO event handling
+├── psychologist_ai.py  # Gemini tutor, conversation memory, and TTS
+├── emotion_module.py   # Webcam frame → emotion (DeepFace)
+├── index.html          # Single-page frontend (UI, avatar, audio, socket client)
+├── requirements.txt
+├── haru/               # Live2D avatar model
+├── static/             # Images and generated audio
+├── tts_cache/          # Cached speech (generated)
+└── ai/                 # Chat memory store (generated)
 ```
 
-## Environment Variables
+## Notes and limitations
 
-| Variable | Default | Description |
-|---|---|---|
-| `GEMINI_API_KEY` | - | Google Gemini API key (required) |
-| `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini model to use |
-| `MEMORY_FILE` | `chat_memory.json` | Path to memory file |
-| `MAX_MEMORY_TURNS` | `20` | Maximum conversation turns to remember |
-| `TTS_CACHE_DIR` | `tts_cache` | Directory for cached TTS files |
-
-## Notes
-
-- Emotion detection works best in good lighting with a clear view of the face
-- Speech recognition requires an internet connection (browser-based)
-- The first TTS generation may take a moment, but subsequent ones are cached
-- Clear cached files periodically if disk space is a concern
+- Emotion detection is only as good as the lighting — a clear, front-facing view works best.
+- Browser speech recognition is cloud-based, so it needs a network connection.
+- Speech is cached by a hash of the text, so repeated lines don't regenerate audio.
+- Conversation state is stored as plain JSON on disk; there is no database.
 
 ## License
 
-This project is open source and available for educational purposes.
+Released under the MIT License. Free to use for learning and experimentation.
